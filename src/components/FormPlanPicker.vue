@@ -1,3 +1,9 @@
+<style scoped>
+	.plans .plan > .price {
+		width: 22%;
+	}
+</style>
+
 <template>
   <div>
     <h1 class="title">Coffee Plans</h1>
@@ -19,10 +25,10 @@
         </div>
         <div class="description">
           <span class="title">
-              {{plan.name}}
+						{{plan.name}}
           </span>
           <span class="description">
-              {{plan.description}}
+						{{plan.description}}
           </span>
         </div>
         <div class="price">
