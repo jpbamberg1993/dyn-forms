@@ -6,7 +6,7 @@
       Create an account or log in to order your liquid gold subscription
     </h2>
 
-    <form class="form">
+    <form @input="submit" class="form">
       <div class="form-group">
         <label class="form-label" for="email">Email</label>
         <input type="text" v-model="$v.form.email.$model" placeholder="your@email.com" class="form-control" id="email">
@@ -56,7 +56,18 @@
           required
         }
       }
-    }
+    },
+		methods: {
+			submit () {
+				if (!this.$v.$invalid) {
+					this.$emit('update', {
+						email: this.form.email,
+						password: this.form.password,
+						name: this.form.name
+					})
+				}
+			}
+		}
   }
 </script>
 

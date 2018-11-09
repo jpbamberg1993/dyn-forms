@@ -1,9 +1,3 @@
-<style scoped>
-	.plans .plan > .price {
-		width: 22%;
-	}
-</style>
-
 <template>
   <div>
     <h1 class="title">Coffee Plans</h1>
@@ -78,7 +72,17 @@
     methods: {
       pickPlan (plan) {
         this.selectedPlan = plan
+				
+				this.$emit('update', {
+					plan: this.selectedPlan
+				})
       }
     }
   }
 </script>
+
+<style scoped>
+	.plans .plan > .price {
+		width: 22%;
+	}
+</style>
