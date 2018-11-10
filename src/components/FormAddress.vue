@@ -9,7 +9,7 @@
     <form @input="submit" class="form">
       <div class="form-group">
         <label class="form-label" for="delivery_name">Name</label>
-        <input v-model="$v.form.recipient.$model" type="text" placeholder="Recipients Name" class="form-control" id="delivery_name">
+        <input v-model="$v.form.recipient.$model" type="text" placeholder="Recipient Name" class="form-control" id="delivery_name">
         <div v-if="$v.form.recipient.$error" class="error">field is required</div>
       </div>
 
@@ -25,11 +25,12 @@
 <script>
   import {required} from 'vuelidate/lib/validators'
   export default {
+		props: ['name'],
     data () {
       return {
         form: {
           address: null,
-          recipient: null
+          recipient: this.name
         }
       }
     },
