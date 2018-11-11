@@ -56,7 +56,7 @@
 						recipient: this.form.recipient,
 						address: this.form.address
 					},
-					valid: !this.$v.invalid
+					valid: !this.$v.$invalid
 				})
 			}
 		}
