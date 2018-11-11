@@ -35,7 +35,7 @@
       return {
         form: {
           address: null,
-          recipient: this.wizardData.plan.name
+          recipient: this.wizardData.name
         }
       }
     },
