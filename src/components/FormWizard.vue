@@ -109,8 +109,8 @@ export default {
 		submitOrder () {
 			this.asyncState = 'pending'
 			postFormToDB(this.form)
-				.then(() => {
-					console.log('form submitted', this.form)
+				.then((returnedForm) => {
+					console.log('form submitted', JSON.stringify(returnedForm))
 					this.asyncState = 'success'
 					this.currentStepNumber++
 				})

@@ -1,38 +1,60 @@
 <template>
   <div>
-    <h1 class="title">Create Account</h1>
+		<h1 class="title">Create Account</h1>
 
-    <h2 class="subtitle">
-      Create an account or log in to order your liquid gold subscription
-    </h2>
+		<h2 class="subtitle">
+			Create an account or log in to order your liquid gold subscription
+		</h2>
 
-    <form @input="submit" class="form">
-      <div class="form-group">
-        <label class="form-label" for="email">Email</label>
-        <input type="text" v-model="$v.form.email.$model" placeholder="your@email.com" class="form-control" id="email">
-        <div v-if="$v.form.email.$error && !$v.form.email.required" class="error">email is required</div>
-        <div v-if="$v.form.email.$error && !$v.form.email.email" class="error">email is invalid</div>
-      </div>
+		<form v-if="!loggedIn" @input="submit" class="form">
+			<div class="form-group">
+				<label class="form-label" for="email">Email</label>
+				<input
+					type="text"
+					@input="checkIfUserExists"
+					v-model="$v.form.email.$model"
+					placeholder="your@email.com"
+					class="form-control"
+					id="email">
+				<div v-if="$v.form.email.$error && !$v.form.email.required" class="error">email is required</div>
+				<div v-if="$v.form.email.$error && !$v.form.email.email" class="error">email is invalid</div>
+			</div>
 
 
-      <div class="form-group">
-        <label class="form-label" for="password">Password</label>
-        <input v-model="$v.form.password.$model" type="password" placeholder="Super Secret Password" class="form-control" id="password">
-        <div v-if="$v.form.password.$error && !$v.form.password.required" class="error">password is required</div>
-      </div>
+			<div v-if="emailCheckedInDB" class="form-group">
+				<label class="form-label" for="password">Password</label>
+				<input
+					v-model="$v.form.password.$model"
+					type="password"
+					placeholder="Super Secret Password"
+					class="form-control"
+					id="password">
+				<div v-if="$v.form.password.$error && !$v.form.password.required" class="error">password is required</div>
+				<div v-if="$v.form.password.$error && !$v.form.password.correct" class="error">password is not correct</div>
+			</div>
 
 
-      <div class="form-group">
-        <label class="form-label" for="name">Name</label>
-        <input v-model="$v.form.name.$model" type="text" placeholder="What should we call you?" class="form-control" id="name">
-        <div v-if="$v.form.name.$error" class="error">name is required</div>
-      </div>
-    </form>
+			<div v-if="existingUser" class="form-group">
+				<button @click.prevent="login" class="btn">Login</button>
+			</div>
+
+
+			<div v-if="emailCheckedInDB && !existingUser" class="form-group">
+				<label class="form-label" for="name">Name</label>
+				<input v-model="$v.form.name.$model" type="text" placeholder="What should we call you?" class="form-control" id="name">
+				<div v-if="$v.form.name.$error" class="error">name is required</div>
+			</div>
+		</form>
+		<h3 v-else class="text-center">
+			Successfully logged in! <a href="#" @click="reset">Not {{ form.name }}</a>
+		</h3>
   </div>
 </template>
 
 <script>
   import {required, email} from 'vuelidate/lib/validators'
+	import {authenticateUser, checkIfUserExistsInDB} from '../api/index.js'
+
   export default {
     data () {
       return {
@@ -40,9 +62,17 @@
           email: null,
           password: null,
           name: null,
-        }
+        },
+				emailCheckedInDB: false,
+				existingUser: false,
+				wrongPassword: false,
       }
     },
+		computed: {
+			loggedIn () {
+				return this.existingUser && this.form.name
+			}
+		},
     validations: {
       form: {
         email: {
@@ -50,7 +80,10 @@
           email
         },
         password: {
-          required
+          required,
+					correct () {
+						return !this.wrongPassword
+					}
         },
         name: {
           required
@@ -58,6 +91,15 @@
       }
     },
 		methods: {
+			reset () {
+				this.form.email = null
+				this.form.password = null
+				this.form.name = null
+				this.emailCheckedInDB = false
+				this.existingUser = false
+				this.wrongPassword = false
+				this.$v.$reset()
+			},
 			submit () {
 				this.$emit('update', {
 					data: {
@@ -67,6 +109,33 @@
 					},
 					valid: !this.$v.$invalid
 				})
+			},
+			checkIfUserExists () {
+				if (!this.$v.form.email.$invalid) {
+					checkIfUserExistsInDB(this.form.email)
+						.then(() => {
+							this.existingUser = true
+							this.emailCheckedInDB = true
+						})
+						.catch((err) => {
+							console.log(err)
+							this.existingUser = false
+							this.emailCheckedInDB = true
+						})
+				}
+			},
+			login () {
+				this.wrongPassword = false
+				if (!this.$v.form.password.$invalid) {
+					authenticateUser(this.form.email, this.form.password)
+						.then((user) => {
+							this.form.name = user.name
+							this.submit()
+						})
+						.catch(() => {
+							this.wrongPassword = true
+						})
+				}
 			}
 		}
   }
