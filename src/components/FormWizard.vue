@@ -6,6 +6,7 @@
 					ref="currentStep"
 					:is="currentStep"
 					@update="processStep"
+		 			@updateAsyncState="updateAsyncState"
 					:wizard-data="form"/>
 			</keep-alive>
 
@@ -57,6 +58,7 @@ import FormPlanPicker from './FormPlanPicker'
 import FormUserDetails from './FormUserDetails'
 import FormAddress from './FormAddress'
 import FormReviewOrder from './FormReviewOrder'
+import _ from 'lodash'
 export default {
   name: 'FormWizard',
   components: {
@@ -106,8 +108,11 @@ export default {
     }
   },
   methods: {
+		updateAsyncState (state) {
+			this.asyncState = state
+		},
 		submitOrder () {
-			this.asyncState = 'pending'
+			updateAsyncState('pending')
 			postFormToDB(this.form)
 				.then((returnedForm) => {
 					console.log('form submitted', JSON.stringify(returnedForm))

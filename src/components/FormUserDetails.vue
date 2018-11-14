@@ -54,7 +54,7 @@
 <script>
   import {required, email} from 'vuelidate/lib/validators'
 	import {authenticateUser, checkIfUserExistsInDB} from '../api/index.js'
-
+	import _ from 'lodash'
   export default {
     data () {
       return {
@@ -112,28 +112,36 @@
 			},
 			checkIfUserExists () {
 				if (!this.$v.form.email.$invalid) {
-					checkIfUserExistsInDB(this.form.email)
-						.then(() => {
-							this.existingUser = true
-							this.emailCheckedInDB = true
-						})
-						.catch((err) => {
-							console.log(err)
-							this.existingUser = false
-							this.emailCheckedInDB = true
-						})
+					_.debounce(() => {
+						this.$emit('updateAsyncState', 'pending')
+						checkIfUserExistsInDB(this.form.email)
+							.then(() => {
+								this.existingUser = true
+								this.emailCheckedInDB = true
+								this.$emit('updateAsyncState', 'success')
+							})
+							.catch((err) => {
+								console.log(err)
+								this.existingUser = false
+								this.emailCheckedInDB = true
+								this.$emit('updateAsyncState', 'success')
+							})
+					}, 1200)()
 				}
 			},
 			login () {
 				this.wrongPassword = false
 				if (!this.$v.form.password.$invalid) {
+					this.$emit('updateAsyncState', 'pending')
 					authenticateUser(this.form.email, this.form.password)
 						.then((user) => {
 							this.form.name = user.name
 							this.submit()
+							this.$emit('updateAsyncState', 'success')
 						})
 						.catch(() => {
 							this.wrongPassword = true
+							this.$emit('updateAsyncState', 'success')
 						})
 				}
 			}
