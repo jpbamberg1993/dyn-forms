@@ -54,7 +54,10 @@
 <script>
   import {required, email} from 'vuelidate/lib/validators'
 	import {authenticateUser, checkIfUserExistsInDB} from '../api/index.js'
+	import debounce from 'lodash.debounce'
 	import _ from 'lodash'
+
+
   export default {
     data () {
       return {
@@ -112,7 +115,7 @@
 			},
 			checkIfUserExists () {
 				if (!this.$v.form.email.$invalid) {
-					_.debounce(() => {
+					debounce(() => {
 						this.$emit('updateAsyncState', 'pending')
 						checkIfUserExistsInDB(this.form.email)
 							.then(() => {
