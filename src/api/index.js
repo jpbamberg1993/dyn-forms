@@ -18,7 +18,6 @@ export const checkIfUserExistsInDB = email => {
 
 export const authenticateUser = (email, password) => {
   return new Promise((resolve, reject) => {
-    console.log(email === user.email && password === user.password)
     setTimeout(() => {
       if (email === user.email && password === user.password) {
         resolve({
