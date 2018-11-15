@@ -121,7 +121,6 @@
 								this.$emit('updateAsyncState', 'success')
 							})
 							.catch((err) => {
-								console.log(err)
 								this.existingUser = false
 								this.emailCheckedInDB = true
 								this.$emit('updateAsyncState', 'success')
