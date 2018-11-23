@@ -6,16 +6,19 @@
 			Create an account or log in to order your liquid gold subscription
 		</h2>
 
-		<form v-if="!loggedIn" @input="submit" class="form">
+		<form v-if="!loggedIn" class="form">
 			<div class="form-group">
 				<label class="form-label" for="email">Email</label>
 				<input
 					type="text"
-					@input="checkIfUserExists"
 					v-model="$v.form.email.$model"
+		 			:disabled="emailCheckedInDB"
 					placeholder="your@email.com"
 					class="form-control"
 					id="email">
+				<div v-if="emailCheckedInDB" class="error info">
+					<a href="#" @click="reset">Not you?</a>
+				</div>
 				<div v-if="$v.form.email.$error && !$v.form.email.required" class="error">email is required</div>
 				<div v-if="$v.form.email.$error && !$v.form.email.email" class="error">email is invalid</div>
 			</div>
@@ -31,11 +34,6 @@
 					id="password">
 				<div v-if="$v.form.password.$error && !$v.form.password.required" class="error">password is required</div>
 				<div v-if="$v.form.password.$error && !$v.form.password.correct" class="error">password is not correct</div>
-			</div>
-
-
-			<div v-if="existingUser" class="form-group">
-				<button @click.prevent="login" class="btn">Login</button>
 			</div>
 
 
@@ -101,47 +99,68 @@
 				this.$v.$reset()
 			},
 			submit () {
-				this.$emit('update', {
-					data: {
-						email: this.form.email,
-						password: this.form.password,
-						name: this.form.name
-					},
-					valid: !this.$v.$invalid
+				let job
+				if (!this.emailCheckedInDB) {
+					this.$v.form.email.$touch()
+					job = this.checkIfUserExists()
+				} else {
+					if (this.existingUser && !this.loggedIn) {
+						this.$v.form.password.$touch()
+						job = this.login()
+					} else {
+						// new user manually typing info
+						this.$v.$touch()
+						job = Promise.resolve()
+					}
+				}
+
+				return new Promise((resolve, reject) => {
+					job.then(() => {
+						if (!this.$v.$invalid) {
+							resolve({
+								email: this.form.email,
+								password: this.form.password,
+								name: this.form.name
+							})
+						} else {
+							reject('data is not valid yet')
+						}
+					}).catch(error => reject(error))
 				})
 			},
 			checkIfUserExists () {
 				if (!this.$v.form.email.$invalid) {
-					debounce(() => {
-						this.$emit('updateAsyncState', 'pending')
-						checkIfUserExistsInDB(this.form.email)
-							.then(() => {
-								this.existingUser = true
-								this.emailCheckedInDB = true
-								this.$emit('updateAsyncState', 'success')
-							})
-							.catch(() => {
-								this.existingUser = false
-								this.emailCheckedInDB = true
-								this.$emit('updateAsyncState', 'success')
-							})
-					}, 1200)()
+					this.$emit('updateAsyncState', 'pending')
+					return checkIfUserExistsInDB(this.form.email)
+						.then(() => {
+							this.existingUser = true
+							this.emailCheckedInDB = true
+							this.$emit('updateAsyncState', 'success')
+						})
+						.catch(() => {
+							this.existingUser = false
+							this.emailCheckedInDB = true
+							this.$emit('updateAsyncState', 'success')
+						})
+				} else {
+					return Promise.reject('email is invalid')
 				}
 			},
 			login () {
 				this.wrongPassword = false
 				if (!this.$v.form.password.$invalid) {
 					this.$emit('updateAsyncState', 'pending')
-					authenticateUser(this.form.email, this.form.password)
+					return authenticateUser(this.form.email, this.form.password)
 						.then((user) => {
 							this.form.name = user.name
-							this.submit()
 							this.$emit('updateAsyncState', 'success')
 						})
 						.catch(() => {
 							this.wrongPassword = true
 							this.$emit('updateAsyncState', 'success')
 						})
+				} else {
+					return Promise.reject('password is invalid')
 				}
 			}
 		}
