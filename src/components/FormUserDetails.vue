@@ -52,7 +52,6 @@
 <script>
   import {required, email} from 'vuelidate/lib/validators'
   import {authenticateUser, checkIfUserExistsInDB} from '../api/index.js'
-  import debounce from 'lodash.debounce'
   export default {
     data () {
       return {

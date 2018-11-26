@@ -40,7 +40,7 @@
         <a href="https://vueschool.io" target="_blank" class="btn">Go somewhere cool</a>
       </p>
     </div>
-    
+
     <div class="loading-wrapper" v-if="asyncState === 'pending'">
       <div class="loader">
         <img src="/spinner.svg" alt="">
@@ -56,14 +56,15 @@ import FormPlanPicker from './FormPlanPicker'
 import FormUserDetails from './FormUserDetails'
 import FormAddress from './FormAddress'
 import FormReviewOrder from './FormReviewOrder'
-import _ from 'lodash'
 export default {
   name: 'FormWizard',
   components: {
+    /* eslint-disable vue/no-unused-components */
     FormPlanPicker,
     FormUserDetails,
     FormAddress,
     FormReviewOrder
+    /* eslint-enable vue/no-unused-components */
   },
   data () {
     return {
@@ -112,6 +113,7 @@ export default {
       this.updateAsyncState('pending')
       postFormToDB(this.form)
         .then((returnedForm) => {
+          // eslint-disable-next-line no-console
           console.log('form submitted', JSON.stringify(returnedForm))
           this.asyncState = 'success'
           this.currentStepNumber++
@@ -127,7 +129,7 @@ export default {
             this.goNext()
           }
         })
-        .catch(error => console.log(error))
+        .catch(error => console.log(error)) // eslint-disable-line no-console
     },
     goBack () {
       this.currentStepNumber--

@@ -6,13 +6,13 @@ const user = {
 
 export const checkIfUserExistsInDB = email => {
   return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email === user.email) {
-          resolve(true)
-        } else {
-          reject('user not found')
-        }
-      }, 1000)
+    setTimeout(() => {
+      if (email === user.email) {
+        resolve(true)
+      } else {
+        reject('user not found')
+      }
+    }, 1000)
   })
 }
 
