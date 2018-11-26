@@ -19,10 +19,10 @@
         </div>
         <div class="description">
           <span class="title">
-						{{plan.name}}
+            {{plan.name}}
           </span>
           <span class="description">
-						{{plan.description}}
+            {{plan.description}}
           </span>
         </div>
         <div class="price">
@@ -73,24 +73,24 @@
       pickPlan (plan) {
         this.selectedPlan = plan
       },
-			submit () {
-				this.$v.$touch()
-				return new Promise((resolve, reject) => {
-					if (!this.$v.$invalid) {
-						resolve({
-							plan: this.selectedPlan
-						})
-					} else {
-						reject('plan not selected')
-					}
-				})
-			}
+      submit () {
+        this.$v.$touch()
+        return new Promise((resolve, reject) => {
+          if (!this.$v.$invalid) {
+            resolve({
+              plan: this.selectedPlan
+            })
+          } else {
+            reject('plan not selected')
+          }
+        })
+      }
     }
   }
 </script>
 
 <style scoped>
-	.plans .plan > .price {
-		width: 22%;
-	}
+  .plans .plan > .price {
+    width: 22%;
+  }
 </style>
